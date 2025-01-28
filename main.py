@@ -13,7 +13,7 @@ def main():
 		try:
 			contents = open(f'./out/{repo_file}', 'r').readlines()
 			repo_path = contents[0].strip()
-			git_size = int(contents[1].split(' ')[0].strip())
+			git_size = int(contents[1].split('\t')[0].strip())
 			repo_data = json.loads(contents[2])
 			repo_name = os.path.basename(repo_path).replace('.git', '')
 			repo =  {
