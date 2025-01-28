@@ -32,7 +32,8 @@ declare -a repos
 IFS=$'\n' repos=($(cat $REPO_STORE))
 
 for repo_path in "${repos[@]}"; do
-	run_linguist "$repo_path" &
+	# Do not run this async as a background process (using &). Will crash small servers. Ask me how I know lol.
+	run_linguist "$repo_path"
 done
 
 wait

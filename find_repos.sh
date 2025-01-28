@@ -8,9 +8,12 @@ EMAILS=("someemail@gmail.com")
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd 2>/dev/null)"
 # This is the file where we store the list of repos we've scanned
 REPO_STORE="$SCRIPT_PATH/repos.txt"
+# File which contains repos we don't want to scan
+BLACKLIST="$SCRIPT_PATH/blacklist.txt"
 # Colors
 RED='\033[0;31m'
-GREEN='\033[0;32m'
+
+# Get all repos from SCAN_DIRGREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
@@ -46,10 +49,17 @@ check_repo_authors() {
 # Script start
 # Get or create list of existing repos
 declare -a existing_repos
+declare -a repos
+declare -a blacklist
+
+# Get existing repos list
 touch "$REPO_STORE"
 IFS=$'\n' existing_repos=($(cat $REPO_STORE))
 
-declare -a repos
+# Get blacklist
+IFS=$'\n' blacklist=($(cat $REPO_STORE))
+
+# Get all repos from SCAN_DIR
 echo -e "${YELLOW}Scanning git repos $SCAN_DIR...${NC}"
 repos=($(find "$SCAN_DIR" -type d -name "*.git"))
 repo_count=${#repos[@]}
@@ -66,8 +76,13 @@ for repo_path in "${repos[@]}"; do
 		continue
 	fi
 
+	if [[ " ${blacklist[*]} " =~ [[:space:]]${repo_path}[[:space:]] ]]; then
+		echo "Skipping $repo_path, blacklisted"
+		continue
+	fi
+
 	# Ensure either a working git repo or a bare repo
-	if [ -d "$repo_path/.git" ] || [ -d "$repo_path/HEAD" ]; then
+	if [ -d "$repo_path/.git" ] || [ -f "$repo_path/HEAD" ]; then
 		check_repo_authors "$repo_path" &
 	fi
 done
