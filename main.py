@@ -21,7 +21,7 @@ def main():
 			repo_path = contents[0].strip()
 			repo_data = json.loads(contents[1])
 			code_size = get_code_size(repo_data)
-			repo_name = os.path.basename(repo_path)
+			repo_name = os.path.basename(repo_path).replace('.git', '')
 			repo =  {
 				'name': repo_name,
 				'path': repo_path,
