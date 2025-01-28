@@ -20,9 +20,10 @@ run_linguist() {
 	local output_file="$OUT_FOLDER/$repo_name.txt"
 	
 	# Run linguist command
-	echo "Running linguist in $repo_path" # Add path to repo in output file
-	echo "$repo_path" >$output_file
-	github-linguist --json >>$output_file
+	echo "Running linguist in $repo_path"
+	echo "$repo_path" >$output_file # Write path to first line
+	echo $(du -s "$repo_path")>>$output_file # Write size to second line
+	github-linguist --json >>$output_file # Write language data to last line
 
 	cd - >/dev/null # This guy wants to output stuff, so we need to suppress it
 }
