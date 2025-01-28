@@ -16,6 +16,8 @@ def write_repo_file(data: dict):
 def main():
 	repositories = []
 	for repo_file in os.listdir('./out'):
+		if repo_file.endswith('.json'): continue
+		
 		try:
 			contents = open(f'./out/{repo_file}', 'r').readlines()
 			repo_path = contents[0].strip()
