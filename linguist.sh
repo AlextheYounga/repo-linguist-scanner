@@ -35,5 +35,3 @@ for repo_path in "${repos[@]}"; do
 	# Do not run this async as a background process (using &). Will crash small servers. Ask me how I know lol.
 	run_linguist "$repo_path"
 done
-
-wait
