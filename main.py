@@ -1,6 +1,13 @@
 import os
 import json
 
+def get_code_size(repo_data: dict):
+	total_size = 0
+	for data in repo_data.values():
+		total_size += data['size']
+	return total_size
+
+
 def write_repo_file(data: dict):
 	with open(f'./out/repositories.json', 'w') as file:
 		file.write(json.dumps(data))
@@ -13,8 +20,8 @@ def main():
 		try:
 			contents = open(f'./out/{repo_file}', 'r').readlines()
 			repo_path = contents[0].strip()
-			git_size = int(contents[1].split('\t')[0].strip())
-			repo_data = json.loads(contents[2])
+			repo_data = json.loads(contents[1])
+			git_size = get_code_size(repo_data)
 			repo_name = os.path.basename(repo_path).replace('.git', '')
 			repo =  {
 				'name': repo_name,
