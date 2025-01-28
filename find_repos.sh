@@ -1,21 +1,26 @@
 #!/bin/bash
 
-# This is the directory to search for git repos
-SCAN_DIR=$1 
-# These are the git authors we're going to search for
-EMAILS=("someemail@gmail.com") 
 # Define the root directory to start searching from
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd 2>/dev/null)"
+SCAN_DIR=$1 # This is the directory to search for git repos
+declare -a EMAILS # These are git authors we are going to search for.
+declare -a BLACKLIST # File which contains repos we don't want to scan
+declare -a EXISTING_REPOS # This is the file where we store the list of repos we've scanned
+
 # This is the file where we store the list of repos we've scanned
-REPO_STORE="$SCRIPT_PATH/repos.txt"
-# File which contains repos we don't want to scan
-BLACKLIST="$SCRIPT_PATH/blacklist.txt"
+REPO_STORE="$SCRIPT_PATH/repos.txt" 
+touch "$REPO_STORE"
+
+IFS=$'\n' EMAILS=($(cat "$SCRIPT_PATH/data/emails.txt" )) 
+IFS=$'\n' BLACKLIST=($(cat "$SCRIPT_PATH/data/blacklist.txt")) 
+IFS=$'\n' EXISTING_REPOS=($(cat "$REPO_STORE")) 
+
 # Colors
 RED='\033[0;31m'
-
-# Get all repos from SCAN_DIRGREEN='\033[0;32m'
+GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
+
 
 repo_contains_author() {
 	for email in "${EMAILS[@]}"; do
@@ -46,18 +51,9 @@ check_repo_authors() {
 }
 
 
-# Script start
-# Get or create list of existing repos
-declare -a existing_repos
+# === Script start === #
 declare -a repos
-declare -a blacklist
-
-# Get existing repos list
 touch "$REPO_STORE"
-IFS=$'\n' existing_repos=($(cat $REPO_STORE))
-
-# Get blacklist
-IFS=$'\n' blacklist=($(cat $REPO_STORE))
 
 # Get all repos from SCAN_DIR
 echo -e "${YELLOW}Scanning git repos $SCAN_DIR...${NC}"
@@ -71,19 +67,21 @@ for repo_path in "${repos[@]}"; do
 		repo_path=$(dirname "$repo_path")
 	fi
 
-	if [[ " ${existing_repos[*]} " =~ [[:space:]]${repo_path}[[:space:]] ]]; then
+	if [[ " ${EXISTING_REPOS[*]} " =~ [[:space:]]${repo_path}[[:space:]] ]]; then
 		echo "Skipping $repo_path, already scanned"
 		continue
 	fi
 
-	if [[ " ${blacklist[*]} " =~ [[:space:]]${repo_path}[[:space:]] ]]; then
+	if [[ " ${BLACKLIST[*]} " =~ [[:space:]]${repo_path}[[:space:]] ]]; then
 		echo "Skipping $repo_path, blacklisted"
 		continue
 	fi
 
 	# Ensure either a working git repo or a bare repo
 	if [ -d "$repo_path/.git" ] || [ -f "$repo_path/HEAD" ]; then
-		check_repo_authors "$repo_path" &
+		echo -e "${YELLOW}Checking $repo_path...${NC}"
+		check_repo_authors "$repo_path"
+		wait
 	fi
 done
 

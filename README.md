@@ -2,7 +2,9 @@
 
 ## Scripts to Scan All Repositories on a Machine and Calculate Language Data
 
-These are currently disconnected scripts, but they could easily be binded together into a single script
+This currently runs nightly on an external server of mine, calculates all my language statistics, and then pushes them to my website. 
+
+https://alextheyounger.me/
 
 1. Find all repos
 `./find_repos.sh /path/to/scan`
